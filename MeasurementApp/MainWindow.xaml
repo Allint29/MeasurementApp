@@ -1,0 +1,82 @@
+﻿<Window x:Class="MeasurementApp.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:MeasurementApp"
+        xmlns:view="clr-namespace:MeasurementApp.Views"
+        xmlns:col="clr-namespace:System.Collections;assembly=mscorlib"
+        xmlns:tools="clr-namespace:MeasurementApp.Tools"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="650" Width="850">
+    <Window.Resources>
+        <tools:DateTimeToDateConverter x:Key="MyDateConverter" />
+        <Style TargetType="Button">
+            <Setter Property="FontFamily" Value="Verdana" />
+            <Setter Property="MinHeight" Value="40" />
+            <Setter Property="MinWidth" Value="140" />
+            <Setter Property="Background" Value="Black" />
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="Margin" Value="10" />
+        </Style>
+        <Style TargetType="TextBox">
+            <Setter Property="FontFamily" Value="Verdana" />
+            <Setter Property="MinHeight" Value="30" />
+            <Setter Property="MinWidth" Value="200" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="Margin" Value="2" />
+        </Style>
+        <Style TargetType="ComboBox">
+            <Setter Property="FontFamily" Value="Verdana" />
+            <Setter Property="MinHeight" Value="30" />
+            <Setter Property="MinWidth" Value="200" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="Margin" Value="2" />
+        </Style>
+        <Style TargetType="Label">
+            <Setter Property="FontFamily" Value="Verdana" />
+            <Setter Property="FontSize" Value="10"></Setter>
+            <Setter Property="MinHeight" Value="30" />
+            <Setter Property="MinWidth" Value="140" />
+            <Setter Property="Foreground" Value="Black" />
+            <Setter Property="Margin" Value="2" />
+        </Style>
+        <Style TargetType="GroupBox">
+            <Setter Property="FontFamily" Value="Verdana" />
+            <Setter Property="FontSize" Value="12"></Setter>
+            <Setter Property="MinHeight" Value="30" />
+            <Setter Property="MinWidth" Value="140" />
+            <Setter Property="Foreground" Value="Black" />
+            <Setter Property="Margin" Value="0" />
+        </Style>
+
+        <Style TargetType="TabControl">
+            <Setter Property="FontFamily" Value="Verdana" />
+            <Setter Property="FontSize" Value="12"></Setter>
+            <Setter Property="MinHeight" Value="30" />
+            <Setter Property="MinWidth" Value="140" />
+            <Setter Property="Foreground" Value="Black" />
+            <Setter Property="Margin" Value="2" />
+            <Setter Property="Padding" Value="2"></Setter>
+        </Style>
+
+    </Window.Resources>
+    <Grid>
+        <TabControl Grid.ColumnSpan="2">
+            <TabItem x:Name="tcMeasurements" Header="Справочник заказов">
+                <view:MeasurmentAddView x:Name="MeasurementAddView"></view:MeasurmentAddView>
+            </TabItem>
+            <TabItem x:Name="tcClients" Header="Справочник клиентов">
+                <view:ClientView x:Name="ClientViewXaml"></view:ClientView>
+            </TabItem>
+            <TabItem x:Name="tcLimits" Header="Справочник лимитов">
+                <view:MeasurementLimitView x:Name="MeasurementViewXaml"></view:MeasurementLimitView>
+            </TabItem>
+            <TabItem x:Name="tcCities" Header="Справочник городов" IsSelected="True">
+                <view:CityView x:Name="CityViewXaml"></view:CityView>
+            </TabItem>
+
+        </TabControl>
+
+    </Grid>
+</Window>

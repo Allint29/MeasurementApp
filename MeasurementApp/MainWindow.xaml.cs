@@ -23,17 +23,21 @@ namespace MeasurementApp
     /// </summary>
     public partial class MainWindow : Window
     {
-        //Хранилище городов
-        //private readonly List<City> _cities = new List<City>();
-
-        //Хранилище клиентов
-        //private readonly List<Client> _clients = new List<Client>();
-
 
         public MainWindow()
         {
             InitializeComponent();
 
+            Init();
+
+            tcCities.DataContext = new CityViewModel();
+            tcClients.DataContext = new ClientViewModel();
+            tcLimits.DataContext = new MeasurementLimitViewModel();
+            tcMeasurements.DataContext = new MeasurementViewModel();
+        }
+
+        private void Init()
+        {
             //Добавляю города
             City[] arrCities =
             {
@@ -121,7 +125,6 @@ namespace MeasurementApp
                 new Measurement(arrMesurLimits[0], arrClients[6]),
                 //запись на Москву 1 половина -- полностью заполнена - если поставить им на одну и ту же дату
                 new Measurement(arrMesurLimits[0], arrClients[10]),
-
                 //запись на Саратов
                 new Measurement(arrMesurLimits[6], arrClients[7]),
                 //запись на Саратов
@@ -131,19 +134,12 @@ namespace MeasurementApp
             int count = 0;
             foreach (var m in arrMeas)
             {
-                if (count++%2 == 0)
+                if (count++ % 2 == 0)
                     m.SetDateForMeasurement(DateTime.Today.AddDays(1));
                 Measurement.AllMeasurements.Add(m);
-                
+
             }
 
-
-            tcCities.DataContext = new CityViewModel();
-            tcClients.DataContext = new ClientViewModel();
-            tcLimits.DataContext = new MeasurementLimitViewModel();
-            tcMeasurements.DataContext = new MeasurementViewModel();
         }
-
-
     }
 }

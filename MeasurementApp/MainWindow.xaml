@@ -63,8 +63,8 @@
     </Window.Resources>
     <Grid>
         <TabControl Grid.ColumnSpan="2">
-            <TabItem x:Name="tcMeasurements" Header="Справочник заказов">
-                <view:MeasurmentAddView x:Name="MeasurementAddView"></view:MeasurmentAddView>
+            <TabItem x:Name="tcCities" Header="Справочник городов" IsSelected="True">
+                <view:CityView x:Name="CityViewXaml"></view:CityView>
             </TabItem>
             <TabItem x:Name="tcClients" Header="Справочник клиентов">
                 <view:ClientView x:Name="ClientViewXaml"></view:ClientView>
@@ -72,10 +72,9 @@
             <TabItem x:Name="tcLimits" Header="Справочник лимитов">
                 <view:MeasurementLimitView x:Name="MeasurementViewXaml"></view:MeasurementLimitView>
             </TabItem>
-            <TabItem x:Name="tcCities" Header="Справочник городов" IsSelected="True">
-                <view:CityView x:Name="CityViewXaml"></view:CityView>
+            <TabItem x:Name="tcMeasurements" Header="Справочник заказов">
+             <view:MeasurmentAddView x:Name="MeasurementAddView"></view:MeasurmentAddView>
             </TabItem>
-
         </TabControl>
 
     </Grid>

@@ -43,7 +43,7 @@ namespace MeasurementApp.ViewModels
         }
         
 
-        private DateTime? _selectedDate;
+        private DateTime? _selectedDate = DateTime.Today;
         /// <summary>
         /// Хранит дату для замера
         /// </summary>
@@ -427,7 +427,29 @@ namespace MeasurementApp.ViewModels
 
         }
 
-        //SetDateCommand FindReadyDataCommand
+        private RelayCommand _nfoWithDateCommand;
+        public RelayCommand InfoWithDateCommand
+        {
+            get
+            {
+                return _nfoWithDateCommand ??= new RelayCommand(obj =>
+                    {
+                        if (obj is Measurement mes)
+                        {
+                            string message =
+                                $"Клиент: {mes.Client.LastName} {mes.Client.FirstName}, телефон {mes.Client.PhoneNumber}\n" +
+                                $"Город заказа: {mes.MeasurementLimit.City}, дата: {mes.MeasurementDate?.ToString("dd.MM.yyyy")} \n" +
+                                $"Время с {mes.MeasurementLimit.BeginHour}:00 по {mes.MeasurementLimit.EndHour}:00\n" +
+                                $"Номер заказа: {mes.Id}.";
+                            MessageBox.Show(message);
+                            SelectedMeasureWithDate = null;
+                        }
+                    },
+                    (obj) => SelectedMeasureWithDate != null);
+            }
+        }
+
+
         private RelayCommand _findReadyDataCommand;
         public RelayCommand FindReadyDataCommand
         {

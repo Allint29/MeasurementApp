@@ -5,21 +5,26 @@ using System.Windows.Input;
 
 namespace MeasurementApp.Tools
 {
-    class RelayCommand : ICommand
+    public class RelayCommand : ICommand
     {
         private readonly Action<object> _execute;
         private readonly Func<object, bool> _canExecute;
 
-        public event EventHandler CanExecuteChanged
-        {
-            add => CommandManager.RequerySuggested += value;
-            remove => CommandManager.RequerySuggested -= value;
-        }
-
+        public event EventHandler CanExecuteChanged = delegate { };
+        //{
+        //    add => CommandManager.RequerySuggested += value;
+        //    remove => CommandManager.RequerySuggested -= value;
+        //}
+        //
         public RelayCommand(Action<object> execute, Func<object, bool> canExecute = null)
         {
             this._execute = execute;
             this._canExecute = canExecute;
+        }
+
+        public void RaiseCanExecuteChanged()
+        {
+            CanExecuteChanged(this, EventArgs.Empty);
         }
 
         public bool CanExecute(object parameter)

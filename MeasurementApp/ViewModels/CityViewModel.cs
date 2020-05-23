@@ -1,19 +1,98 @@
-﻿using System;
+﻿using MeasurementApp.Annotations;
+using MeasurementApp.Models;
+using MeasurementApp.Tools;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Runtime.CompilerServices;
-using System.Text;
 using System.Windows;
-using MeasurementApp.Annotations;
-using MeasurementApp.Models;
-using MeasurementApp.Tools;
+using System.Windows.Media.Animation;
 
 namespace MeasurementApp.ViewModels
 {
-    class CityViewModel: INotifyPropertyChanged
+    public class CityViewModel: INotifyPropertyChanged
     {
+        public RelayCommand AddCommand { get; set; }
+
+        public Action<object> OnAdd() => o => Add(_nameCity);
+
+        public void Add(string name)
+        {
+
+            if (!string.IsNullOrEmpty(name))
+            {
+                City city = new City(name);
+                var results = new List<ValidationResult>();
+                var context = new ValidationContext(city);
+                if (!Validator.TryValidateObject(city, context, results, true))
+                {
+                    foreach (var error in results)
+                    {
+                        MessageBox.Show(error.ErrorMessage);
+                    }
+                }
+                else
+                {
+                    City.AllCities.Insert(0, city);
+                    Cities.Clear();
+                    foreach (var c in City.AllCities)
+                    {
+                        Cities.Add(c);
+                    }
+
+                    SelectedItem = null;
+                    NameCity = null;
+                }
+            }
+        }
+
+        public Func<object, bool> CanAdd()=> o => NameNotEmpty(NameCity);
+        public bool NameNotEmpty(string name) => !string.IsNullOrEmpty(NameCity);
+
+
+        public RelayCommand FindCommand { get; set; }
+        public Action<object> OnFind() => o => Find(NameCity);
+        public void Find(string name)
+        {
+            if (!string.IsNullOrEmpty(name))
+            {
+
+                Cities.Clear();
+                foreach (var c in City.AllCities)
+                {
+                    if (c.Name.Contains(name, StringComparison.InvariantCultureIgnoreCase))
+                        Cities.Add(c);
+                }
+            }
+            else
+            {
+                Cities.Clear();
+                foreach (var c in City.AllCities)
+                {
+                    Cities.Add(c);
+                }
+            }
+            SelectedItem = null;
+        }
+
+        public RelayCommand RemoveCommand { get; set; }
+        public Action<object> OnRemove() => o => Remove(SelectedItem);
+        public void Remove(City city)
+        {
+            Cities.Remove(city);
+            City.AllCities.Remove(city);
+
+            SelectedItem = null;
+        }
+
+        public Func<object, bool> CanRemove()
+        {
+            return o => IsSelectedItem();
+        }
+
+        public bool IsSelectedItem() => SelectedItem != null && City.AllCities.Count > 0;
 
         public ObservableCollection<City> Cities { get; set; }
 
@@ -25,6 +104,9 @@ namespace MeasurementApp.ViewModels
                 Cities.Add(c);
             }
 
+            AddCommand = new RelayCommand(OnAdd(), CanAdd());
+            FindCommand = new RelayCommand(OnFind());
+            RemoveCommand = new RelayCommand(OnRemove(), CanRemove());
         }
 
         private City _selectedItem;
@@ -35,116 +117,24 @@ namespace MeasurementApp.ViewModels
             {
                 _selectedItem = value;
                 OnPropertyChanged(nameof(SelectedItem));
+                RemoveCommand.RaiseCanExecuteChanged();
             }
         }
 
 
         private string _nameCity;
+        [Required]
         public string NameCity
         {
             get => _nameCity;
             set
             {
                 _nameCity = value;
+               
                 OnPropertyChanged(nameof(NameCity));
+                AddCommand.RaiseCanExecuteChanged();
             }
         }
-        
-
-        private RelayCommand _addCommand;
-        public RelayCommand AddCommand
-        {
-            get
-            {
-                return _addCommand ??= new RelayCommand(obj =>
-                {
-
-                    //var cityName = obj as string;
-                    var cityName = _nameCity;
-
-                    if (!string.IsNullOrEmpty(cityName))
-                    {
-                        City city = new City(cityName);
-                        var results = new List<ValidationResult>();
-                        var context = new ValidationContext(city);
-                        if (!Validator.TryValidateObject(city, context, results, true))
-                        {
-                            foreach (var error in results)
-                            {
-                                MessageBox.Show(error.ErrorMessage);
-                            }
-                        }
-                        else
-                        {
-                            City.AllCities.Insert(0, city);
-                            Cities.Clear();
-                            foreach (var c in City.AllCities)
-                            {
-                                Cities.Add(c);
-                            }
-
-                            SelectedItem = city;
-                        }
-                    }
-                });
-            }
-        }
-
-
-        private RelayCommand _findCommand;
-        public RelayCommand FindCommand
-        {
-            get
-            {
-                return _findCommand ??= new RelayCommand(obj =>
-                {
-
-                    var cityName = _nameCity;
-
-                    if (!string.IsNullOrEmpty(cityName))
-                    {
-                        
-                       Cities.Clear();
-                       foreach (var c in City.AllCities)
-                       {
-                           if(c.Name.Contains(cityName, StringComparison.InvariantCultureIgnoreCase))
-                            Cities.Add(c);
-                       }
-
-                       SelectedItem = null;
-                       
-                    }
-                    else
-                    {
-                        Cities.Clear();
-                        foreach (var c in City.AllCities)
-                        {
-                            Cities.Add(c);
-                        }
-
-                        SelectedItem = null;
-                    }
-                });
-            }
-        }
-
-        private RelayCommand _removeCommand;
-        public RelayCommand RemoveCommand
-        {
-            get
-            {
-                return _removeCommand ??= new RelayCommand(obj =>
-                    {
-                        if (obj is City city)
-                        {
-                            Cities.Remove(city);
-                            City.AllCities.Remove(city);
-                        }
-                    },
-                    (obj) => City.AllCities.Count > 0);
-            }
-        }
-
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -162,5 +152,6 @@ namespace MeasurementApp.ViewModels
                 OnPropertyChanged(propertyName);
             }
         }
+
     }
 }

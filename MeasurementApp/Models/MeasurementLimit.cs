@@ -14,7 +14,7 @@ using MeasurementApp.Validators;
 namespace MeasurementApp.Models
 {
     [MeasurementLimitValidation]
-    class MeasurementLimit: IDisposable, INotifyPropertyChanged, IDataErrorInfo, IValidatableObject
+    public class MeasurementLimit: IDisposable, INotifyPropertyChanged, IDataErrorInfo, IValidatableObject
     {
         
         private static int _id;

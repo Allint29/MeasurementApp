@@ -11,7 +11,7 @@ using MeasurementApp.Annotations;
 
 namespace MeasurementApp.Models
 {
-    class Client: IDisposable, INotifyPropertyChanged, IDataErrorInfo
+    public class Client: IDisposable, INotifyPropertyChanged, IDataErrorInfo
     {
         public int Id { get; private set; }
 
@@ -194,7 +194,7 @@ namespace MeasurementApp.Models
             return phone;
         }
 
-        private (string, City) GetSomeAddress()
+        public (string, City) GetSomeAddress()
         {
             var rnd = new Random();
             

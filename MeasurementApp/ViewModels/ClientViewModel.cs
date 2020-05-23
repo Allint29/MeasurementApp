@@ -14,7 +14,7 @@ using MeasurementApp.Tools;
 
 namespace MeasurementApp.ViewModels
 {
-    class ClientViewModel : INotifyPropertyChanged, IDataErrorInfo
+    public class ClientViewModel : INotifyPropertyChanged, IDataErrorInfo
     {
         public ObservableCollection<Client> Clients { get; set; }
 

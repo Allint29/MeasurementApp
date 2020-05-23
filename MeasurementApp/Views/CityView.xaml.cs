@@ -23,16 +23,5 @@ namespace MeasurementApp.Views
         {
             InitializeComponent();
         }
-
-        private void ButtonBase_OnClick(object sender, RoutedEventArgs e)
-        {
-            StringBuilder sb = new StringBuilder();
-            foreach (var city in City.AllCities)
-            {
-                sb.Append($"Ид: {city.Id}, Имя: {city.Name}, хэш: {city.GetHashCode()}\n");
-            }
-
-            MessageBox.Show(sb.ToString());
-        }
     }
 }

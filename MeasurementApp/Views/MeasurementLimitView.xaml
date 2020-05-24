@@ -60,9 +60,6 @@
                                 <Button Grid.Row="0" Grid.Column="0" Content="Создать лимит" HorizontalAlignment="Stretch"
                                         Command="{Binding AddCommand}" 
                                         />
-                                <Button Grid.Row="0" Grid.Column="2" Content="Очистить форму" HorizontalAlignment="Stretch" 
-                                        Command="{Binding ClearCommand}" 
-                                />
                             </Grid>
                         </StackPanel >
                     </StackPanel>

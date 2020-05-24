@@ -62,7 +62,21 @@
 
     </Window.Resources>
     <Grid>
-        <TabControl Grid.ColumnSpan="2">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="30"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Menu Grid.Row="0" Height="25" VerticalAlignment="Top">
+            <MenuItem Header="Файл">
+                <MenuItem Header="Выход" Click="MenuItem_OnClick"></MenuItem>
+            </MenuItem>
+            <MenuItem Header="Помощь">
+                <MenuItem Header="Справочник заказов (вкладка 1)" Click="MenuItem_OnClick1" ></MenuItem>
+                <MenuItem Header="Справочник заказов (вкладка 2)" Click="MenuItem_OnClick2"></MenuItem>
+                <MenuItem Header="Справочник заказов (вкладка 3)" Click="MenuItem_OnClick3"></MenuItem>
+            </MenuItem>
+        </Menu>
+        <TabControl Grid.Row="1" Grid.ColumnSpan="2">
             <TabItem x:Name="tcCities" Header="Справочник городов" IsSelected="True">
                 <view:CityView x:Name="CityViewXaml"></view:CityView>
             </TabItem>

@@ -68,7 +68,7 @@ namespace MeasurementApp.ViewModels
             var list =
                 MeasurementLimit.AllMeasurementLimits
                     .Where(m => CityForFind == null || CityForFind.Id == AllCity.Id ||
-                                m.City.Id == CityForFind.Id);
+                                m.City.Id == CityForFind.Id).ToList();
 
             foreach (var m in list)
             {

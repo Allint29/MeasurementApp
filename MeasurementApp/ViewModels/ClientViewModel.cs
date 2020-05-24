@@ -101,7 +101,7 @@ namespace MeasurementApp.ViewModels
                         .Where(c => string.IsNullOrEmpty(FindClientObject.PhoneNumber) ||
                                     c.PhoneNumber.ToString().Contains(FindClientObject.PhoneNumber, StringComparison.InvariantCultureIgnoreCase))
                         .Where(c => FindClientObject.City == null || FindClientObject.City.Id == AllCity.Id ||
-                                    c.City.Id == FindClientObject.City.Id);
+                                    c.City.Id == FindClientObject.City.Id).ToList();
 
                 foreach (var c in list)
                 {

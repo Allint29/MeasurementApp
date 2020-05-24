@@ -13,7 +13,7 @@ using MeasurementApp.Tools;
 
 namespace MeasurementApp.ViewModels
 {
-    class MeasurementViewModel : INotifyPropertyChanged
+    public class MeasurementViewModel : INotifyPropertyChanged
     {
         public RelayCommand AddCommand { get; set; }
 
@@ -32,8 +32,8 @@ namespace MeasurementApp.ViewModels
             }
         }
 
-        public Func<object, bool> CanAdd() => o => IsSelectedObjects();
-        public bool IsSelectedObjects() => SelectedClient != null && SelectedLimit != null;
+        public Func<object, bool> CanAdd() => o => IsSelectedClientAndLimit();
+        public bool IsSelectedClientAndLimit() => SelectedClient != null && SelectedLimit != null;
 
         public RelayCommand FindCommand { get; set; }
         public Action<object> OnFind() => o => Find();
@@ -49,7 +49,7 @@ namespace MeasurementApp.ViewModels
                          .Where(c => string.IsNullOrEmpty(LastName) ||
                                     c.LastName.Contains(LastName, StringComparison.InvariantCultureIgnoreCase))
                          .Where(c => CityForFind == null || CityForFind.Id == AllCity.Id ||
-                                    c.City.Id == CityForFind.Id);
+                                    c.City.Id == CityForFind.Id).ToList();
 
                 foreach (var c in listClients)
                 {
@@ -63,7 +63,7 @@ namespace MeasurementApp.ViewModels
                 var listLimits =
                     MeasurementLimit.AllMeasurementLimits
                         .Where(m => CityForFind == null || CityForFind.Id == AllCity.Id ||
-                                    m.City.Id == CityForFind.Id);
+                                    m.City.Id == CityForFind.Id).ToList();
 
                 foreach (var m in listLimits)
                 {
@@ -78,7 +78,7 @@ namespace MeasurementApp.ViewModels
                 var listMeasure =
                     Measurement.AllMeasurements
                         .Where(m => CityForFind == null || CityForFind.Id == AllCity.Id ||
-                                    m.MeasurementLimit.City.Id == CityForFind.Id);
+                                    m.MeasurementLimit.City.Id == CityForFind.Id).ToList();
 
                 foreach (var m in listMeasure)
                 {
@@ -96,12 +96,14 @@ namespace MeasurementApp.ViewModels
                 MeasurementsWithoutDate.Clear();
                 MeasurementsWithDate.Clear();
 
+                Clients.Clear();
                 foreach (var c in Client.AllClients)
                 {
                     Clients.Add(c);
                 }
                 SelectedClient = null;
 
+                Limits.Clear();
                 foreach (var m in MeasurementLimit.AllMeasurementLimits)
                 {
                     Limits.Add(m);
@@ -152,7 +154,7 @@ namespace MeasurementApp.ViewModels
                     var list = Measurement.AllMeasurements
                         .Where(m => m.MeasurementLimit.City.Id == CityForFind.Id
                                     && m.MeasurementDate >= SelectedBeginDate
-                                    && m.MeasurementDate <= SelectedEndDate);
+                                    && m.MeasurementDate <= SelectedEndDate).ToList();
 
                     MeasurementsWithDate.Clear();
 
@@ -163,7 +165,7 @@ namespace MeasurementApp.ViewModels
                 {
                     var list = Measurement.AllMeasurements
                         .Where(m => m.MeasurementDate >= SelectedBeginDate
-                                    && m.MeasurementDate <= SelectedEndDate);
+                                    && m.MeasurementDate <= SelectedEndDate).ToList();
 
                     MeasurementsWithDate.Clear();
 
@@ -258,13 +260,13 @@ namespace MeasurementApp.ViewModels
 
             if (CityForFind != null && CityForFind.Id != AllCity.Id)
             {
-                foreach (var c in Client.AllClients.Where(c => c.City.Id == CityForFind.Id))
+                foreach (var c in Client.AllClients.Where(c => c.City.Id == CityForFind.Id).ToList())
                     Clients.Add(c);
 
-                foreach (var m in MeasurementLimit.AllMeasurementLimits.Where(m => m.City.Id == CityForFind.Id))
+                foreach (var m in MeasurementLimit.AllMeasurementLimits.Where(m => m.City.Id == CityForFind.Id).ToList())
                     Limits.Add(m);
 
-                foreach (var m in Measurement.AllMeasurements.Where(m => m.MeasurementLimit.City.Id == CityForFind.Id))
+                foreach (var m in Measurement.AllMeasurements.Where(m => m.MeasurementLimit.City.Id == CityForFind.Id).ToList())
                 {
                     //формирую списки для показа с назначенными замерами датам и без дат
                     if (m.MeasurementDate == null || DateTime.Equals(m.MeasurementDate, DateTime.MinValue))

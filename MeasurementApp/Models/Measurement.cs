@@ -13,7 +13,7 @@ namespace MeasurementApp.Models
     /// <summary>
     /// Модель замера может иметь одного клиента и одну дату
     /// </summary>
-    class Measurement : IDisposable, INotifyPropertyChanged
+    public class Measurement : IDisposable, INotifyPropertyChanged
     {
         /// <summary>
         /// Уникальный номер

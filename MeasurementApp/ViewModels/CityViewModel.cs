@@ -87,10 +87,7 @@ namespace MeasurementApp.ViewModels
             SelectedItem = null;
         }
 
-        public Func<object, bool> CanRemove()
-        {
-            return o => IsSelectedItem();
-        }
+        public Func<object, bool> CanRemove() => o => IsSelectedItem();
 
         public bool IsSelectedItem() => SelectedItem != null && City.AllCities.Count > 0;
 

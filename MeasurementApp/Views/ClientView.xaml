@@ -83,7 +83,7 @@
                         <StackPanel VerticalAlignment="Center" Orientation="Horizontal">
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Stretch">
                                 <StackPanel Orientation="Vertical" VerticalAlignment="Center">
-                                    <TextBlock Text="Фамилия"></TextBlock>
+                                    <TextBlock Text="Имя"></TextBlock>
                                     <TextBox   MaxLength="100" HorizontalAlignment="Left"  TextWrapping="Wrap" Width="170"
                                            x:Name ="TextClientFirstNameFind" 
                                            Text="{Binding FindClientObject.FirstName}" 
@@ -91,7 +91,7 @@
                                     </TextBox>
                                 </StackPanel>
                                 <StackPanel Orientation="Vertical" VerticalAlignment="Center">
-                                    <TextBlock Text="Имя"></TextBlock>
+                                    <TextBlock Text="Фамилия"></TextBlock>
                                     <TextBox   MaxLength="100" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Bottom" Width="170"
                                            x:Name ="TextClientLastFind" Text="{Binding FindClientObject.LastName}">
                                     </TextBox>

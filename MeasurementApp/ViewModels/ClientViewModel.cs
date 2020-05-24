@@ -16,6 +16,117 @@ namespace MeasurementApp.ViewModels
 {
     public class ClientViewModel : INotifyPropertyChanged, IDataErrorInfo
     {
+        public RelayCommand AddCommand { get; set; }
+
+        public Action<object> OnAdd() => o => Add();
+
+        public void Add()
+        {
+            if (Errors.Count < 1)
+            {
+                var client = new Client(FirstName, LastName, PhoneNumber, City, Address);
+
+                Client.AllClients.Insert(0, client);
+
+                Clients.Clear();
+                foreach (var c in Client.AllClients)
+                {
+                    Clients.Add(c);
+                }
+
+                SelectedItem = client;
+
+                this.LastName = "";
+                this.FirstName = "";
+                this.PhoneNumber = 0;
+                this.City = null;
+                this.Address = "";
+            }
+            else
+            {
+                StringBuilder sb = new StringBuilder();
+                foreach (var k in Errors.Keys)
+                {
+                    sb.Append($"Ошибка в поле {k}: {Errors[k]};\n");
+                }
+
+                MessageBox.Show(sb.ToString());
+            }
+        }
+
+        public Func<object, bool> CanAdd() => o => NewClientNoHaveEmptyFields();
+        public bool NewClientNoHaveEmptyFields() => 
+            !string.IsNullOrEmpty(LastName) &&
+            !string.IsNullOrEmpty(FirstName) &&
+            PhoneNumber >= 90000000 && PhoneNumber <= 9999999999 &&
+            City != null &&
+            !string.IsNullOrEmpty(Address)
+            ;
+
+        public RelayCommand ClearCommand { get; set; }
+        public Action<object> OnClear() => o => ClearFields();
+
+        public void ClearFields()
+        {
+            this.LastName = "";
+            this.FirstName = "";
+            this.PhoneNumber = 0;
+            this.City = null;
+            this.Address = "";
+        }
+
+        public Func<object, bool> CanClear() => o => FieldsNotCleared();
+        public bool FieldsNotCleared() =>
+            !string.IsNullOrEmpty(LastName) ||
+            !string.IsNullOrEmpty(FirstName) ||
+            PhoneNumber != 0 ||
+            City != null ||
+            !string.IsNullOrEmpty(Address);
+
+        public RelayCommand FindCommand { get; set; }
+        public Action<object> OnFind() => o => Find(FindClientObject);
+
+        public void Find(FindClientObject obj)
+        {
+            if (obj != null)
+            {
+                Clients.Clear();
+
+                var list =
+                    Client.AllClients
+                        .Where(c => string.IsNullOrEmpty(FindClientObject.FirstName) ||
+                                    c.FirstName.Contains(FindClientObject.FirstName, StringComparison.InvariantCultureIgnoreCase))
+                        .Where(c => string.IsNullOrEmpty(FindClientObject.LastName) ||
+                                    c.LastName.Contains(FindClientObject.LastName, StringComparison.InvariantCultureIgnoreCase))
+                        .Where(c => string.IsNullOrEmpty(FindClientObject.PhoneNumber) ||
+                                    c.PhoneNumber.ToString().Contains(FindClientObject.PhoneNumber, StringComparison.InvariantCultureIgnoreCase))
+                        .Where(c => FindClientObject.City == null || FindClientObject.City.Id == AllCity.Id ||
+                                    c.City.Id == FindClientObject.City.Id);
+
+                foreach (var c in list)
+                {
+                    Clients.Add(c);
+                }
+
+                SelectedItem = null;
+            }
+        }
+
+        public RelayCommand RemoveCommand { get; set; }
+        public Action<object> OnRemove() => o => Remove(SelectedItem);
+        public void Remove(Client client)
+        {
+            Clients.Remove(client);
+            Client.AllClients.Remove(client);
+
+            SelectedItem = null;
+        }
+
+        public Func<object, bool> CanRemove() => o => IsSelectedItem();
+
+        public bool IsSelectedItem() => SelectedItem != null && Client.AllClients.Count > 0;
+
+
         public ObservableCollection<Client> Clients { get; set; }
 
         public ObservableCollection<City> Cities => Models.City.AllCities;
@@ -45,6 +156,11 @@ namespace MeasurementApp.ViewModels
             }
 
             City.AllCities.CollectionChanged += AllCitiesOnCollectionChanged;
+
+            AddCommand = new RelayCommand(OnAdd(), CanAdd());
+            ClearCommand = new RelayCommand(OnClear(), CanClear());
+            FindCommand = new RelayCommand(OnFind());
+            RemoveCommand = new RelayCommand(OnRemove(), CanRemove());
         }
 
         /// <summary>
@@ -52,7 +168,7 @@ namespace MeasurementApp.ViewModels
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void AllCitiesOnCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        public void AllCitiesOnCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
             switch (e.Action)
             {
@@ -104,6 +220,7 @@ namespace MeasurementApp.ViewModels
             {
                 _selectedItem = value;
                 OnPropertyChanged(nameof(SelectedItem));
+                RemoveCommand.RaiseCanExecuteChanged();
             }
         }
 
@@ -116,6 +233,8 @@ namespace MeasurementApp.ViewModels
             {
                 _firstName = value;
                 OnPropertyChanged(nameof(FirstName));
+                AddCommand.RaiseCanExecuteChanged();
+                ClearCommand.RaiseCanExecuteChanged();
             }
         }
 
@@ -128,6 +247,8 @@ namespace MeasurementApp.ViewModels
             {
                 _lastName = value;
                 OnPropertyChanged(nameof(LastName));
+                AddCommand.RaiseCanExecuteChanged();
+                ClearCommand.RaiseCanExecuteChanged();
             }
         }
 
@@ -141,7 +262,8 @@ namespace MeasurementApp.ViewModels
             {
                 _phone = value;
                 OnPropertyChanged(nameof(PhoneNumber));
-
+                AddCommand.RaiseCanExecuteChanged();
+                ClearCommand.RaiseCanExecuteChanged();
             }
         }
 
@@ -153,6 +275,8 @@ namespace MeasurementApp.ViewModels
             {
                 _city = value;
                 OnPropertyChanged(nameof(City));
+                AddCommand.RaiseCanExecuteChanged();
+                ClearCommand.RaiseCanExecuteChanged();
             }
         }
 
@@ -165,115 +289,8 @@ namespace MeasurementApp.ViewModels
             {
                 _address = value;
                 OnPropertyChanged(nameof(Address));
-            }
-        }
-
-
-        private RelayCommand _addCommand;
-        public RelayCommand AddCommand
-        {
-            get
-            {
-                return _addCommand ??= new RelayCommand(obj =>
-                {
-                    if (Errors.Count < 1)
-                    {
-                        var client = new Client(FirstName, LastName, PhoneNumber, City, Address);
-
-                        Client.AllClients.Insert(0, client);
-
-                        Clients.Clear();
-                        foreach (var c in Client.AllClients)
-                        {
-                            Clients.Add(c);
-                        }
-
-                        SelectedItem = client;
-
-                        this.LastName = "";
-                        this.FirstName = "";
-                        this.PhoneNumber = 0;
-                        this.City = null;
-                        this.Address = "";
-                    }
-                    else
-                    {
-                        StringBuilder sb = new StringBuilder();
-                        foreach (var k in Errors.Keys)
-                        {
-                            sb.Append($"Ошибка в поле {k}: {Errors[k]};\n");
-                        }
-
-                        MessageBox.Show(sb.ToString());
-                    }
-                });
-            }
-        }
-
-        private RelayCommand _clearCommand;
-        public RelayCommand ClearCommand
-        {
-            get
-            {
-                return _clearCommand ??= new RelayCommand(obj =>
-                {
-                    this.LastName = "";
-                    this.FirstName = "";
-                    this.PhoneNumber = 0;
-                    this.City = null;
-                    this.Address = "";
-                });
-            }
-        }
-
-        private RelayCommand _findCommand;
-        public RelayCommand FindCommand
-        {
-            get
-            {
-                return _findCommand ??= new RelayCommand(obj =>
-                {
-                    if (FindClientObject != null)
-                    {
-                        Clients.Clear();
-
-                        var list =
-                            Client.AllClients
-                                .Where(c => string.IsNullOrEmpty(FindClientObject.FirstName) ||
-                                            c.FirstName.Contains(FindClientObject.FirstName, StringComparison.InvariantCultureIgnoreCase))
-                                .Where(c => string.IsNullOrEmpty(FindClientObject.LastName) ||
-                                            c.LastName.Contains(FindClientObject.LastName, StringComparison.InvariantCultureIgnoreCase))
-                                .Where(c => string.IsNullOrEmpty(FindClientObject.PhoneNumber) ||
-                                            c.PhoneNumber.ToString().Contains(FindClientObject.PhoneNumber, StringComparison.InvariantCultureIgnoreCase))
-                                .Where(c => FindClientObject.City == null || FindClientObject.City.Id == AllCity.Id ||
-                                            c.City.Id == FindClientObject.City.Id);
-
-                        foreach (var c in list)
-                        {
-                            Clients.Add(c);
-                        }
-
-
-                        SelectedItem = null;
-                    }
-                });
-            }
-        }
-        
-        private RelayCommand _removeCommand;
-        public RelayCommand RemoveCommand
-        {
-            get
-            {
-                return _removeCommand ??= new RelayCommand(obj =>
-                    {
-                        if (obj is Client client)
-                        {
-                            Clients.Remove(client);
-                            Client.AllClients.Remove(client);
-                        }
-                    },
-                    (obj) => Client.AllClients.Count > 0);
+                AddCommand.RaiseCanExecuteChanged();
+                ClearCommand.RaiseCanExecuteChanged();
             }
         }
 

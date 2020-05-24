@@ -16,6 +16,82 @@ namespace MeasurementApp.ViewModels
 {
     class MeasurementLimitViewModel : INotifyPropertyChanged, IDataErrorInfo
     {
+        public RelayCommand AddCommand { get; set; }
+        public Action<object> OnAdd() => o => Add();
+
+        public void Add()
+        {
+            GetError("BeginHour", "EndHour", "Limit", "City");
+
+            if (Errors.Count < 1)
+            {
+                var limit = new MeasurementLimit(BeginHour, EndHour, Limit, City);
+
+                MeasurementLimit.AllMeasurementLimits.Insert(0, limit);
+
+                MeasurementLimits.Clear();
+                foreach (var c in MeasurementLimit.AllMeasurementLimits)
+                {
+                    MeasurementLimits.Add(c);
+                }
+
+                SelectedItem = limit;
+            }
+            else
+            {
+                StringBuilder sb = new StringBuilder();
+                foreach (var k in Errors.Keys)
+                {
+                    sb.Append($"Ошибка в поле {k}: {Errors[k]};");
+                }
+
+                Errors.Clear();
+
+                MessageBox.Show(sb.ToString());
+            }
+        }
+
+        public Func<object, bool> CanAdd() => o => FieldsNotEmpty();
+        public bool FieldsNotEmpty() =>
+            City != null &&
+            BeginHour >= 8 && BeginHour <= 20 &&
+            EndHour >= 8 && EndHour <= 20 &&
+            Limit > 0;
+
+
+        public RelayCommand FindCommand { get; set; }
+        public Action<object> OnFind() => o => Find();
+        public void Find()
+        {
+            MeasurementLimits.Clear();
+
+            var list =
+                MeasurementLimit.AllMeasurementLimits
+                    .Where(m => CityForFind == null || CityForFind.Id == AllCity.Id ||
+                                m.City.Id == CityForFind.Id);
+
+            foreach (var m in list)
+            {
+                MeasurementLimits.Add(m);
+            }
+
+            SelectedItem = null;
+        }
+
+        public RelayCommand RemoveCommand { get; set; }
+
+        public Action<object> OnRemove() => o => Remove(SelectedItem);
+        public void Remove(MeasurementLimit limit)
+        {
+            MeasurementLimits.Remove(limit);
+            MeasurementLimit.AllMeasurementLimits.Remove(limit);
+
+            SelectedItem = null;
+        }
+
+        public Func<object, bool> CanRemove() => o => IsSelectedItem();
+        public bool IsSelectedItem() => SelectedItem != null && MeasurementLimit.AllMeasurementLimits.Count > 0;
+
         public ObservableCollection<MeasurementLimit> MeasurementLimits { get; set; }
 
         public ObservableCollection<City> Cities => Models.City.AllCities;
@@ -44,6 +120,10 @@ namespace MeasurementApp.ViewModels
             }
 
             City.AllCities.CollectionChanged += AllCitiesOnCollectionChanged;
+
+            AddCommand = new RelayCommand(OnAdd(), CanAdd());
+            FindCommand = new RelayCommand(OnFind());
+            RemoveCommand = new RelayCommand(OnRemove(), CanRemove());
         }
 
         /// <summary>
@@ -51,7 +131,7 @@ namespace MeasurementApp.ViewModels
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void AllCitiesOnCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        public void AllCitiesOnCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
             switch (e.Action)
             {
@@ -70,7 +150,7 @@ namespace MeasurementApp.ViewModels
                             if (MeasurementLimit.AllMeasurementLimits[i].City.Id == city.Id)
                                 MeasurementLimit.AllMeasurementLimits.Remove(MeasurementLimit.AllMeasurementLimits[i]);
 
-                        if(CitiesForFind.Contains(city))
+                        if (CitiesForFind.Contains(city))
                             CitiesForFind.Remove(city);
                     }
                     break;
@@ -100,6 +180,8 @@ namespace MeasurementApp.ViewModels
             {
                 _selectedItem = value;
                 OnPropertyChanged(nameof(SelectedItem));
+                RemoveCommand.RaiseCanExecuteChanged();
+                Errors.Clear();
             }
         }
 
@@ -117,6 +199,7 @@ namespace MeasurementApp.ViewModels
             {
                 _beginHour = value;
                 OnPropertyChanged(nameof(BeginHour));
+                AddCommand.RaiseCanExecuteChanged();
             }
         }
 
@@ -134,6 +217,7 @@ namespace MeasurementApp.ViewModels
             {
                 _endHour = value;
                 OnPropertyChanged(nameof(BeginHour));
+                AddCommand.RaiseCanExecuteChanged();
             }
 
         }
@@ -151,6 +235,7 @@ namespace MeasurementApp.ViewModels
             {
                 _limit = value;
                 OnPropertyChanged(nameof(Limit));
+                AddCommand.RaiseCanExecuteChanged();
             }
         }
 
@@ -164,86 +249,9 @@ namespace MeasurementApp.ViewModels
             {
                 _city = value;
                 OnPropertyChanged(nameof(City));
+                AddCommand.RaiseCanExecuteChanged();
             }
         }
-
-        private RelayCommand _addCommand;
-        public RelayCommand AddCommand
-        {
-            get
-            {
-                return _addCommand ??= new RelayCommand(obj =>
-                {
-                    if (Errors.Count < 1)
-                    {
-                        var limit = new MeasurementLimit(BeginHour, EndHour, Limit, City);
-
-                        MeasurementLimit.AllMeasurementLimits.Insert(0, limit);
-
-                        MeasurementLimits.Clear();
-                        foreach (var c in MeasurementLimit.AllMeasurementLimits)
-                        {
-                            MeasurementLimits.Add(c);
-                        }
-
-                        SelectedItem = limit;
-                    }
-                    else
-                    {
-                        StringBuilder sb = new StringBuilder();
-                        foreach (var k in Errors.Keys)
-                        {
-                            sb.Append($"Ошибка в поле {k}: {Errors[k]};\n");
-                        }
-
-                        MessageBox.Show(sb.ToString());
-                    }
-                });
-            }
-        }
-
-        private RelayCommand _findCommand;
-        public RelayCommand FindCommand
-        {
-            get
-            {
-                return _findCommand ??= new RelayCommand(obj =>
-                {
-                    MeasurementLimits.Clear();
-
-                    var list =
-                        MeasurementLimit.AllMeasurementLimits
-                            .Where(m => CityForFind == null || CityForFind.Id == AllCity.Id ||
-                                        m.City.Id == CityForFind.Id);
-
-                    foreach (var m in list)
-                    {
-                        MeasurementLimits.Add(m);
-                    }
-                    
-                    SelectedItem = null;
-
-                });
-            }
-        }
-
-        private RelayCommand _removeCommand;
-        public RelayCommand RemoveCommand
-        {
-            get
-            {
-                return _removeCommand ??= new RelayCommand(obj =>
-                    {
-                        if (obj is MeasurementLimit limit)
-                        {
-                            MeasurementLimits.Remove(limit);
-                            MeasurementLimit.AllMeasurementLimits.Remove(limit);
-                        }
-                    },
-                    (obj) => MeasurementLimit.AllMeasurementLimits.Count > 0);
-            }
-        }
-
 
         public string Error => "Ошибка ввода данных клиента";
 
@@ -254,17 +262,19 @@ namespace MeasurementApp.ViewModels
         /// </summary>
         /// <param name="columnName"></param>
         /// <returns></returns>
-        public string this[string columnName]
-        {
-            get
-            {
-                string error = String.Empty;
+        public string this[string columnName] => GetError(columnName);
 
+        public string GetError(params string[] columNames)
+        {
+            string error = String.Empty;
+
+            foreach (var columnName in columNames)
+            {
                 switch (columnName)
                 {
                     case "BeginHour":
 
-                        if(this.City == null)
+                        if (this.City == null)
                             error = error + "Сначала нужно выбрать город.\n";
 
                         var mesLimBegin =
@@ -295,7 +305,7 @@ namespace MeasurementApp.ViewModels
                             Errors["BeginHour"] = error;
                         else
                             if (Errors.ContainsKey("BeginHour"))
-                                Errors.Remove("BeginHour");
+                            Errors.Remove("BeginHour");
 
                         break;
 
@@ -314,7 +324,7 @@ namespace MeasurementApp.ViewModels
                                             return true;
                                     }
 
-                                    return false;  
+                                    return false;
                                 });
                         if (mesLimEnd != null)
                             error = error + "В данном городе есть действующий лимит на это время. Измените его.\n";
@@ -329,7 +339,7 @@ namespace MeasurementApp.ViewModels
                             Errors["EndHour"] = error;
                         else
                             if (Errors.ContainsKey("EndHour"))
-                                Errors.Remove("EndHour");
+                            Errors.Remove("EndHour");
                         break;
 
                     case "City":
@@ -346,8 +356,10 @@ namespace MeasurementApp.ViewModels
                         break;
                 }
 
-                return error;
+
             }
+
+            return error;
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -358,5 +370,5 @@ namespace MeasurementApp.ViewModels
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
-    
+
 }

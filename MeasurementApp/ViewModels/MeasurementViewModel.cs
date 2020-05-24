@@ -15,7 +15,306 @@ namespace MeasurementApp.ViewModels
 {
     class MeasurementViewModel : INotifyPropertyChanged
     {
-        //public ObservableCollection<Measurement> Measurements { get; set; }
+        public RelayCommand AddCommand { get; set; }
+
+        public Action<object> OnAdd() => o => Add();
+
+        public void Add()
+        {
+            if (SelectedClient != null && SelectedLimit != null)
+            {
+                Measurement mes = new Measurement(SelectedLimit, SelectedClient);
+                MeasurementsWithoutDate.Add(mes);
+                Measurement.AllMeasurements.Add(mes);
+
+                SelectedLimit = null;
+                SelectedClient = null;
+            }
+        }
+
+        public Func<object, bool> CanAdd() => o => IsSelectedObjects();
+        public bool IsSelectedObjects() => SelectedClient != null && SelectedLimit != null;
+
+        public RelayCommand FindCommand { get; set; }
+        public Action<object> OnFind() => o => Find();
+        public void Find()
+        {
+            //если выбран определенный город, то фильтрую лимиты и клиентов
+            if (CityForFind != null && CityForFind?.Id != AllCity.Id)
+            {
+                Clients.Clear();
+
+                var listClients =
+                    Client.AllClients
+                         .Where(c => string.IsNullOrEmpty(LastName) ||
+                                    c.LastName.Contains(LastName, StringComparison.InvariantCultureIgnoreCase))
+                         .Where(c => CityForFind == null || CityForFind.Id == AllCity.Id ||
+                                    c.City.Id == CityForFind.Id);
+
+                foreach (var c in listClients)
+                {
+                    Clients.Add(c);
+                }
+
+                SelectedClient = null;
+
+                Limits.Clear();
+
+                var listLimits =
+                    MeasurementLimit.AllMeasurementLimits
+                        .Where(m => CityForFind == null || CityForFind.Id == AllCity.Id ||
+                                    m.City.Id == CityForFind.Id);
+
+                foreach (var m in listLimits)
+                {
+                    Limits.Add(m);
+                }
+
+                SelectedLimit = null;
+
+                MeasurementsWithoutDate.Clear();
+                MeasurementsWithDate.Clear();
+
+                var listMeasure =
+                    Measurement.AllMeasurements
+                        .Where(m => CityForFind == null || CityForFind.Id == AllCity.Id ||
+                                    m.MeasurementLimit.City.Id == CityForFind.Id);
+
+                foreach (var m in listMeasure)
+                {
+                    //формирую списки для показа с назначенными замерами датам и без дат
+                    if (m.MeasurementDate == null || DateTime.Equals(m.MeasurementDate, DateTime.MinValue))
+                        MeasurementsWithoutDate.Add(m);
+                    else
+                        MeasurementsWithDate.Add(m);
+                }
+
+            }
+            //если не выбран определенный город
+            else
+            {
+                MeasurementsWithoutDate.Clear();
+                MeasurementsWithDate.Clear();
+
+                foreach (var c in Client.AllClients)
+                {
+                    Clients.Add(c);
+                }
+                SelectedClient = null;
+
+                foreach (var m in MeasurementLimit.AllMeasurementLimits)
+                {
+                    Limits.Add(m);
+                }
+                SelectedLimit = null;
+
+                foreach (var m in Measurement.AllMeasurements)
+                {
+                    //формирую списки для показа с назначенными замерами датам и без дат
+                    if (m.MeasurementDate == null || DateTime.Equals(m.MeasurementDate, DateTime.MinValue))
+                        MeasurementsWithoutDate.Add(m);
+                    else
+                        MeasurementsWithDate.Add(m);
+                }
+            }
+        }
+
+        public RelayCommand InfoWithDateCommand { get; set; }
+        public Action<object> OnGetInfoWithDate() => o => InfoAboutMeasurement(SelectedMeasureWithDate);
+
+        public void InfoAboutMeasurement(object obj)
+        {
+            if (obj is Measurement mes)
+            {
+                string message =
+                    $"Клиент: {mes.Client.LastName} {mes.Client.FirstName}, телефон {mes.Client.PhoneNumber}\n" +
+                    $"Город заказа: {mes.MeasurementLimit.City}, дата: {mes.MeasurementDate?.ToString("dd.MM.yyyy")} \n" +
+                    $"Время с {mes.MeasurementLimit.BeginHour}:00 по {mes.MeasurementLimit.EndHour}:00\n" +
+                    $"Номер заказа: {mes.Id:d6}.";
+                MessageBox.Show(message);
+                SelectedMeasureWithDate = null;
+            }
+        }
+
+        public Func<object, bool> CanGetInfoWithDate() => o => IsSelectedMeasurement();
+        public bool IsSelectedMeasurement() => SelectedMeasureWithDate != null;
+
+
+        public RelayCommand FindReadyDataCommand { get; set; }
+        public Action<object> OnFindReadyData() => o => FindReadyData();
+
+        public void FindReadyData()
+        {
+            if (SelectedBeginDate != null && SelectedEndDate != null)
+            {
+                if (CityForFind != null && CityForFind?.Id != AllCity.Id)
+                {
+                    var list = Measurement.AllMeasurements
+                        .Where(m => m.MeasurementLimit.City.Id == CityForFind.Id
+                                    && m.MeasurementDate >= SelectedBeginDate
+                                    && m.MeasurementDate <= SelectedEndDate);
+
+                    MeasurementsWithDate.Clear();
+
+                    foreach (var m in list)
+                        MeasurementsWithDate.Add(m);
+                }
+                else
+                {
+                    var list = Measurement.AllMeasurements
+                        .Where(m => m.MeasurementDate >= SelectedBeginDate
+                                    && m.MeasurementDate <= SelectedEndDate);
+
+                    MeasurementsWithDate.Clear();
+
+                    foreach (var m in list)
+                        MeasurementsWithDate.Add(m);
+
+                }
+
+                SelectedLimit = null;
+            }
+            else
+            {
+                MessageBox.Show("Выберите город, начальную и конечную даты для поиска назначенных замеров.");
+            }
+        }
+
+        public RelayCommand SetDateCommand { get; set; }
+        public Action<object> OnSetDate() => o => SetDate();
+
+        public void SetDate()
+        {
+            if (SelectedDate != null && SelectedMeasureWithoutDate != null)
+            {
+                if (SelectedMeasureWithoutDate.SetDateForMeasurement(SelectedDate))
+                {
+                    MeasurementsWithDate.Add(SelectedMeasureWithoutDate);
+                    MeasurementsWithoutDate.Remove(SelectedMeasureWithoutDate);
+                }
+            }
+            else
+            {
+                MessageBox.Show("Для установки даты замера нужно выбрать дату и заявку на замер.");
+            }
+        }
+
+        public RelayCommand RemoveWithOutDateCommand { get; set; }
+        public Action<object> OnRemoveWithOutDate() => o => RemoveWithOutDate(SelectedMeasureWithoutDate);
+
+        public void RemoveWithOutDate(object obj)
+        {
+            if (obj is Measurement mes)
+            {
+                MeasurementsWithoutDate.Remove(mes);
+                Measurement.AllMeasurements.Remove(mes);
+            }
+        }
+
+        public Func<object, bool> CanRemoveWithOutDate() => o => IsSelectedMeasureWithoutDate();
+        public bool IsSelectedMeasureWithoutDate() => SelectedMeasureWithoutDate != null && MeasurementsWithoutDate.Count > 0;
+
+        public RelayCommand RemoveWithDateCommand { get; set; }
+        public Action<object> OnRemoveWithDate() => o => RemoveWithDate(SelectedMeasureWithDate);
+
+        public void RemoveWithDate(object obj)
+        {
+            if (SelectedMeasureWithDate != null)
+            {
+                if (SelectedMeasureWithDate.SetDateForMeasurement(null))
+                {
+                    MeasurementsWithoutDate.Add(SelectedMeasureWithDate);
+                    MeasurementsWithDate.Remove(SelectedMeasureWithDate);
+                }
+            }
+            else
+            {
+                MessageBox.Show("Для установки даты замера нужно выбрать дату и заявку на замер.");
+            }
+        }
+
+        public Func<object, bool> CanRemoveWithDate() => o => IsSelectedMeasureWithDate();
+        public bool IsSelectedMeasureWithDate() => SelectedMeasureWithDate != null && MeasurementsWithDate.Count > 0;
+
+
+        public MeasurementViewModel()
+        {
+            AllCity = new City("Все города");
+            CityForFind = City.AllCities.FirstOrDefault();
+
+            CitiesForFind = new ObservableCollection<City>();
+            CitiesForFind.Insert(0, AllCity);
+
+            foreach (var c in City.AllCities)
+                CitiesForFind.Add(c);
+
+            MeasurementsWithoutDate = new ObservableCollection<Measurement>();
+            MeasurementsWithDate = new ObservableCollection<Measurement>();
+
+
+            Clients = new ObservableCollection<Client>();
+            Limits = new ObservableCollection<MeasurementLimit>();
+            DatesToShow = new ObservableCollection<DateTime?>();
+
+            if (CityForFind != null && CityForFind.Id != AllCity.Id)
+            {
+                foreach (var c in Client.AllClients.Where(c => c.City.Id == CityForFind.Id))
+                    Clients.Add(c);
+
+                foreach (var m in MeasurementLimit.AllMeasurementLimits.Where(m => m.City.Id == CityForFind.Id))
+                    Limits.Add(m);
+
+                foreach (var m in Measurement.AllMeasurements.Where(m => m.MeasurementLimit.City.Id == CityForFind.Id))
+                {
+                    //формирую списки для показа с назначенными замерами датам и без дат
+                    if (m.MeasurementDate == null || DateTime.Equals(m.MeasurementDate, DateTime.MinValue))
+                        MeasurementsWithoutDate.Add(m);
+                    else
+                    {
+                        MeasurementsWithDate.Add(m);
+                        DatesToShow.Add(m.MeasurementDate);
+                    }
+                }
+            }
+            else
+            {
+                foreach (var c in Client.AllClients)
+                    Clients.Add(c);
+
+                foreach (var m in MeasurementLimit.AllMeasurementLimits)
+                    Limits.Add(m);
+
+                foreach (var m in Measurement.AllMeasurements)
+                {
+                    //формирую списки для показа с назначенными замерами датам и без дат
+                    if (m.MeasurementDate == null || DateTime.Equals(m.MeasurementDate, DateTime.MinValue))
+                        MeasurementsWithoutDate.Add(m);
+                    else
+                    {
+                        MeasurementsWithDate.Add(m);
+                        DatesToShow.Add(m.MeasurementDate);
+                    }
+                }
+            }
+
+            //при изменении коллекций удаляю связаанные данные о замерах
+
+            City.AllCities.CollectionChanged += AllCitiesOnCollectionChanged;
+
+            Client.AllClients.CollectionChanged += AllClients_CollectionChanged;
+
+            MeasurementLimit.AllMeasurementLimits.CollectionChanged += AllMeasurementLimits_CollectionChanged;
+
+
+            AddCommand = new RelayCommand(OnAdd(), CanAdd());
+            FindCommand = new RelayCommand(OnFind());
+            InfoWithDateCommand = new RelayCommand(OnGetInfoWithDate(), CanGetInfoWithDate());
+            FindReadyDataCommand = new RelayCommand(OnFindReadyData());
+            SetDateCommand = new RelayCommand(OnSetDate());
+            RemoveWithOutDateCommand = new RelayCommand(OnRemoveWithOutDate(), CanRemoveWithOutDate());
+            RemoveWithDateCommand = new RelayCommand(OnRemoveWithDate(), CanGetInfoWithDate());
+        }
+
 
         public ObservableCollection<Measurement> MeasurementsWithoutDate { get; set; }
 
@@ -91,8 +390,6 @@ namespace MeasurementApp.ViewModels
             }
         }
 
-        //--------------------------------------------------------------
-
         //список клиентов города
         public ObservableCollection<Client> Clients { get; set; }
 
@@ -110,78 +407,8 @@ namespace MeasurementApp.ViewModels
 
         //список лимитов на город
         public ObservableCollection<MeasurementLimit> Limits { get; set; }
-
-        public MeasurementViewModel()
-        {
-            AllCity = new City("Все города");
-            CityForFind = City.AllCities.FirstOrDefault();
-
-            CitiesForFind = new ObservableCollection<City>();
-            CitiesForFind.Insert(0, AllCity);
-
-            foreach (var c in City.AllCities)
-                CitiesForFind.Add(c);
-
-            MeasurementsWithoutDate = new ObservableCollection<Measurement>();
-            MeasurementsWithDate = new ObservableCollection<Measurement>();
-
-
-            Clients = new ObservableCollection<Client>();
-            Limits = new ObservableCollection<MeasurementLimit>();
-            DatesToShow = new ObservableCollection<DateTime?>();
-
-            if (CityForFind != null && CityForFind.Id != AllCity.Id)
-            {
-                foreach (var c in Client.AllClients.Where(c=>c.City.Id == CityForFind.Id))
-                    Clients.Add(c);
-
-                foreach (var m in MeasurementLimit.AllMeasurementLimits.Where(m => m.City.Id == CityForFind.Id))
-                    Limits.Add(m);
-
-                foreach (var m in Measurement.AllMeasurements.Where(m => m.MeasurementLimit.City.Id == CityForFind.Id))
-                {
-                    //формирую списки для показа с назначенными замерами датам и без дат
-                    if (m.MeasurementDate == null || DateTime.Equals(m.MeasurementDate, DateTime.MinValue))
-                        MeasurementsWithoutDate.Add(m);
-                    else
-                    {
-                        MeasurementsWithDate.Add(m);
-                        DatesToShow.Add(m.MeasurementDate);
-                    }
-                }
-            }
-            else
-            {
-                foreach (var c in Client.AllClients)
-                    Clients.Add(c);
-
-                foreach (var m in MeasurementLimit.AllMeasurementLimits)
-                    Limits.Add(m);
-
-                foreach (var m in Measurement.AllMeasurements)
-                {
-                    //формирую списки для показа с назначенными замерами датам и без дат
-                    if (m.MeasurementDate == null || DateTime.Equals(m.MeasurementDate, DateTime.MinValue))
-                        MeasurementsWithoutDate.Add(m);
-                    else
-                    {
-                        MeasurementsWithDate.Add(m);
-                        DatesToShow.Add(m.MeasurementDate);
-                    }
-                }
-            }
-
-            //при изменении коллекций удаляю связаанные данные о замерах
-
-            City.AllCities.CollectionChanged += AllCitiesOnCollectionChanged;
-
-            Client.AllClients.CollectionChanged += AllClients_CollectionChanged;
-
-            MeasurementLimit.AllMeasurementLimits.CollectionChanged += AllMeasurementLimits_CollectionChanged;
-
-        }
-
-        private void AllMeasurementLimits_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        
+        public void AllMeasurementLimits_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
             switch (e.Action)
             {
@@ -254,7 +481,7 @@ namespace MeasurementApp.ViewModels
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void AllCitiesOnCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        public void AllCitiesOnCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
             CitiesForFind.Clear();
 
@@ -275,6 +502,7 @@ namespace MeasurementApp.ViewModels
             {
                 _selectedClient = value;
                 OnPropertyChanged(nameof(SelectedClient));
+                AddCommand.RaiseCanExecuteChanged();
             }
         }
 
@@ -287,6 +515,7 @@ namespace MeasurementApp.ViewModels
             {
                 _selectedLimit = value;
                 OnPropertyChanged(nameof(SelectedLimit));
+                AddCommand.RaiseCanExecuteChanged();
             }
         }
 
@@ -299,6 +528,7 @@ namespace MeasurementApp.ViewModels
             {
                 _selectedMeasureWithoutDate = value;
                 OnPropertyChanged(nameof(SelectedMeasureWithoutDate));
+                RemoveWithOutDateCommand.RaiseCanExecuteChanged();
             }
         }
 
@@ -311,254 +541,10 @@ namespace MeasurementApp.ViewModels
             {
                 _selectedMeasureWithDate = value;
                 OnPropertyChanged(nameof(SelectedMeasureWithDate));
+                InfoWithDateCommand.RaiseCanExecuteChanged();
+                RemoveWithDateCommand.RaiseCanExecuteChanged();
             }
         }
-
-        private RelayCommand _addCommand;
-        public RelayCommand AddCommand
-        {
-            get
-            {
-                return _addCommand ??= new RelayCommand(obj =>
-                {
-                    if (SelectedClient != null && SelectedLimit != null)
-                    {
-                        Measurement mes = new Measurement(SelectedLimit, SelectedClient);
-                        //Measurements.Add(mes);
-                        MeasurementsWithoutDate.Add(mes);
-                        Measurement.AllMeasurements.Add(mes);
-
-                        SelectedLimit = null;
-                        SelectedClient = null;
-                    }
-                });
-            }
-        }
-
-        private RelayCommand _findCommand;
-        public RelayCommand FindCommand
-        {
-            get
-            {
-                return _findCommand ??= new RelayCommand(obj =>
-                {
-                    //если выбран определенный город, то фильтрую лимиты и клиентов
-                    if (CityForFind != null && CityForFind?.Id != AllCity.Id)
-                    {
-                        Clients.Clear();
-
-                        var listClients =
-                            Client.AllClients
-                                 .Where(c => string.IsNullOrEmpty(LastName) ||
-                                            c.LastName.Contains(LastName, StringComparison.InvariantCultureIgnoreCase))
-                                 .Where(c => CityForFind == null || CityForFind.Id == AllCity.Id ||
-                                            c.City.Id == CityForFind.Id);
-
-                        foreach (var c in listClients)
-                        {
-                            Clients.Add(c);
-                        }
-
-                        SelectedClient = null;
-                        
-                        Limits.Clear();
-
-                        var listLimits =
-                            MeasurementLimit.AllMeasurementLimits
-                                .Where(m => CityForFind == null || CityForFind.Id == AllCity.Id ||
-                                            m.City.Id == CityForFind.Id);
-
-                        foreach (var m in listLimits)
-                        {
-                            Limits.Add(m);
-                        }
-
-                        SelectedLimit = null;
-
-                        MeasurementsWithoutDate.Clear();
-                        MeasurementsWithDate.Clear();
-
-                        var listMeasure =
-                            Measurement.AllMeasurements
-                                .Where(m => CityForFind == null || CityForFind.Id == AllCity.Id ||
-                                            m.MeasurementLimit.City.Id == CityForFind.Id);
-
-                        foreach (var m in listMeasure)
-                        {
-                            //формирую списки для показа с назначенными замерами датам и без дат
-                            if (m.MeasurementDate == null || DateTime.Equals(m.MeasurementDate, DateTime.MinValue))
-                                MeasurementsWithoutDate.Add(m);
-                            else
-                                MeasurementsWithDate.Add(m);
-                        }
-
-                    }
-                    //если не выбран определенный город
-                    else
-                    {
-                        MeasurementsWithoutDate.Clear();
-                        MeasurementsWithDate.Clear();
-
-                        foreach (var c in Client.AllClients)
-                        {
-                            Clients.Add(c);
-                        }
-                        SelectedClient = null;
-
-                        foreach (var m in MeasurementLimit.AllMeasurementLimits)
-                        {
-                            Limits.Add(m);
-                        }
-                        SelectedLimit = null;
-
-                        foreach (var m in Measurement.AllMeasurements)
-                        {
-                            //формирую списки для показа с назначенными замерами датам и без дат
-                            if (m.MeasurementDate == null || DateTime.Equals(m.MeasurementDate, DateTime.MinValue))
-                                MeasurementsWithoutDate.Add(m);
-                            else
-                                MeasurementsWithDate.Add(m);
-                        }
-
-
-                    }
-                });
-            }
-
-        }
-
-        private RelayCommand _nfoWithDateCommand;
-        public RelayCommand InfoWithDateCommand
-        {
-            get
-            {
-                return _nfoWithDateCommand ??= new RelayCommand(obj =>
-                    {
-                        if (obj is Measurement mes)
-                        {
-                            string message =
-                                $"Клиент: {mes.Client.LastName} {mes.Client.FirstName}, телефон {mes.Client.PhoneNumber}\n" +
-                                $"Город заказа: {mes.MeasurementLimit.City}, дата: {mes.MeasurementDate?.ToString("dd.MM.yyyy")} \n" +
-                                $"Время с {mes.MeasurementLimit.BeginHour}:00 по {mes.MeasurementLimit.EndHour}:00\n" +
-                                $"Номер заказа: {mes.Id}.";
-                            MessageBox.Show(message);
-                            SelectedMeasureWithDate = null;
-                        }
-                    },
-                    (obj) => SelectedMeasureWithDate != null);
-            }
-        }
-
-
-        private RelayCommand _findReadyDataCommand;
-        public RelayCommand FindReadyDataCommand
-        {
-            get
-            {
-                return _findReadyDataCommand ??= new RelayCommand(obj =>
-                {
-                    if (SelectedBeginDate != null && SelectedEndDate != null)
-                    {
-                        if (CityForFind != null && CityForFind?.Id != AllCity.Id)
-                        {
-                            var list = Measurement.AllMeasurements
-                                .Where(m => m.MeasurementLimit.City.Id == CityForFind.Id
-                                            && m.MeasurementDate >= SelectedBeginDate
-                                            && m.MeasurementDate <= SelectedEndDate);
-
-                            MeasurementsWithDate.Clear();
-
-                            foreach (var m in list)
-                                MeasurementsWithDate.Add(m);
-                        }
-                        else
-                        {
-                            var list = Measurement.AllMeasurements
-                                .Where(m => m.MeasurementDate >= SelectedBeginDate
-                                            && m.MeasurementDate <= SelectedEndDate);
-
-                            MeasurementsWithDate.Clear();
-
-                            foreach (var m in list)
-                                MeasurementsWithDate.Add(m);
-
-                        }
-
-                        SelectedLimit = null;
-                    }
-                    else
-                    {
-                        MessageBox.Show("Выберите город, начальную и конечную даты для поиска назначенных замеров.");
-                    }
-                });
-            }
-        }
-
-        private RelayCommand _setDateCommand;
-        public RelayCommand SetDateCommand
-        {
-            get
-            {
-                return _setDateCommand ??= new RelayCommand(obj =>
-                {
-                    if (SelectedDate != null && SelectedMeasureWithoutDate != null)
-                    {
-                        if (SelectedMeasureWithoutDate.SetDateForMeasurement(SelectedDate))
-                        {
-                            MeasurementsWithDate.Add(SelectedMeasureWithoutDate);
-                            MeasurementsWithoutDate.Remove(SelectedMeasureWithoutDate);
-                        }
-                    }
-                    else
-                    {
-                        MessageBox.Show("Для установки даты замера нужно выбрать дату и заявку на замер.");
-                    }
-                });
-            }
-        }
-
-        private RelayCommand _removeWithOutDateCommand;
-        public RelayCommand RemoveWithOutDateCommand
-        {
-            get
-            {
-                return _removeWithOutDateCommand ??= new RelayCommand(obj =>
-                    {
-                        if (obj is Measurement mes)
-                        {
-                            //Measurements.Remove(mes);
-                            MeasurementsWithoutDate.Remove(mes);
-                            Measurement.AllMeasurements.Remove(mes);
-                        }
-                    },
-                    (obj) => MeasurementsWithoutDate.Count > 0);
-            }
-        }
-
-        private RelayCommand _removeWithDateCommand;
-        public RelayCommand RemoveWithDateCommand
-        {
-            get
-            {
-                return _removeWithDateCommand ??= new RelayCommand(obj =>
-                    {
-                        if (SelectedMeasureWithDate != null)
-                        {
-                            if (SelectedMeasureWithDate.SetDateForMeasurement(null))
-                            {
-                                MeasurementsWithoutDate.Add(SelectedMeasureWithDate);
-                                MeasurementsWithDate.Remove(SelectedMeasureWithDate);
-                            }
-                        }
-                        else
-                        {
-                            MessageBox.Show("Для установки даты замера нужно выбрать дату и заявку на замер.");
-                        }
-                    },
-                    (obj) => MeasurementsWithDate.Count > 0);
-            }
-        }
-
 
         public event PropertyChangedEventHandler PropertyChanged;
 

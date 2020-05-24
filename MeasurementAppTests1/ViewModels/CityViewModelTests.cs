@@ -22,6 +22,8 @@ namespace MeasurementApp.ViewModels.Tests
 
             var c = cityViewModel.Cities.FirstOrDefault(c => string.Equals(c.Name, standart));
 
+            City.AllCities.Clear();
+
             Assert.IsTrue(c != null);
 
         }
@@ -107,7 +109,17 @@ namespace MeasurementApp.ViewModels.Tests
         [TestMethod()]
         public void CityViewModelTest()
         {
-            Assert.Fail();
+            City.AllCities.Add(new City("NewYork"));
+
+            CityViewModel cityViewModel = new CityViewModel();
+
+            bool isNewYork = cityViewModel.Cities.FirstOrDefault(c => string.Equals(c.Name, "NewYork")) != null;
+
+            bool isOneCity = cityViewModel.Cities.Count() == 1;
+
+            City.AllCities.Clear();
+
+            Assert.IsTrue(isNewYork && isOneCity);
         }
     }
 }

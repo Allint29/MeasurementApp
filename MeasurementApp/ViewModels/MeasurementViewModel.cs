@@ -89,6 +89,7 @@ namespace MeasurementApp.ViewModels
                         MeasurementsWithDate.Add(m);
                 }
 
+                StayLimits = GetCountStayLimits();
             }
             //если не выбран определенный город
             else
@@ -118,7 +119,27 @@ namespace MeasurementApp.ViewModels
                     else
                         MeasurementsWithDate.Add(m);
                 }
+
+                StayLimits = null;
             }
+        }
+
+        public int? GetCountStayLimits()
+        {
+            if (SelectedDate != null && CityForFind != null && CityForFind?.Id != AllCity.Id)
+            {
+                var mesLim = MeasurementLimit.AllMeasurementLimits.FirstOrDefault(l => l.City.Id == CityForFind.Id);
+
+                int? maxLimitOnDate = mesLim?.Limit;
+
+                if (maxLimitOnDate != null)
+                    foreach (var m in Measurement.AllMeasurements.Where(m => m.MeasurementLimit.Id == mesLim?.Id && m.MeasurementDate == SelectedDate))
+                        maxLimitOnDate--;
+
+                return maxLimitOnDate;
+            }
+
+            return null;
         }
 
         public RelayCommand InfoWithDateCommand { get; set; }
@@ -193,6 +214,7 @@ namespace MeasurementApp.ViewModels
                 {
                     MeasurementsWithDate.Add(SelectedMeasureWithoutDate);
                     MeasurementsWithoutDate.Remove(SelectedMeasureWithoutDate);
+                    StayLimits = GetCountStayLimits();
                 }
             }
             else
@@ -210,6 +232,7 @@ namespace MeasurementApp.ViewModels
             {
                 MeasurementsWithoutDate.Remove(mes);
                 Measurement.AllMeasurements.Remove(mes);
+                StayLimits = GetCountStayLimits();
             }
         }
 
@@ -227,6 +250,7 @@ namespace MeasurementApp.ViewModels
                 {
                     MeasurementsWithoutDate.Add(SelectedMeasureWithDate);
                     MeasurementsWithDate.Remove(SelectedMeasureWithDate);
+                    StayLimits = GetCountStayLimits();
                 }
             }
             else
@@ -315,6 +339,8 @@ namespace MeasurementApp.ViewModels
             SetDateCommand = new RelayCommand(OnSetDate());
             RemoveWithOutDateCommand = new RelayCommand(OnRemoveWithOutDate(), CanRemoveWithOutDate());
             RemoveWithDateCommand = new RelayCommand(OnRemoveWithDate(), CanGetInfoWithDate());
+
+            StayLimits = GetCountStayLimits();
         }
 
 
@@ -355,6 +381,23 @@ namespace MeasurementApp.ViewModels
             {
                 _selectedDate = value;
                 OnPropertyChanged(nameof(SelectedDate));
+            }
+        }
+
+        private int? _stayLimits;
+
+        public int? StayLimits
+        {
+            get
+            {
+                return _stayLimits;
+
+            }
+
+            set
+            {
+                _stayLimits = value;
+                OnPropertyChanged(nameof(StayLimits));
             }
         }
 

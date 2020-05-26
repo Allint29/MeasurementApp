@@ -381,7 +381,9 @@ namespace MeasurementApp.ViewModels
             set
             {
                 _selectedDate = value;
+                StayLimits = GetCountStayLimits(); StayLimits = GetCountStayLimits();
                 OnPropertyChanged(nameof(SelectedDate));
+                
             }
         }
 

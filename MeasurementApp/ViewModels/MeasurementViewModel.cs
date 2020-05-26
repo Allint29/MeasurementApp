@@ -206,11 +206,11 @@ namespace MeasurementApp.ViewModels
         public RelayCommand SetDateCommand { get; set; }
         public Action<object> OnSetDate() => o => SetDate();
 
-        public void SetDate()
+        public void SetDate(bool showMessage = true)
         {
             if (SelectedDate != null && SelectedMeasureWithoutDate != null)
             {
-                if (SelectedMeasureWithoutDate.SetDateForMeasurement(SelectedDate))
+                if (SelectedMeasureWithoutDate.SetDateForMeasurement(SelectedDate, showMessage))
                 {
                     MeasurementsWithDate.Add(SelectedMeasureWithoutDate);
                     MeasurementsWithoutDate.Remove(SelectedMeasureWithoutDate);
@@ -219,7 +219,8 @@ namespace MeasurementApp.ViewModels
             }
             else
             {
-                MessageBox.Show("Для установки даты замера нужно выбрать дату и заявку на замер.");
+                if(showMessage)
+                    MessageBox.Show("Для установки даты замера нужно выбрать дату и заявку на замер.");
             }
         }
 

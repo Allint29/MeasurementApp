@@ -77,7 +77,10 @@
             </MenuItem>
         </Menu>
         <TabControl Grid.Row="1" Grid.ColumnSpan="2">
-            <TabItem x:Name="tcCities" Header="Справочник городов" IsSelected="True">
+            <TabItem x:Name="tcMeasurements" Header="Справочник заказов" IsSelected="True">
+                <view:MeasurmentAddView x:Name="MeasurementAddView"></view:MeasurmentAddView>
+            </TabItem>
+            <TabItem x:Name="tcCities" Header="Справочник городов" >
                 <view:CityView x:Name="CityViewXaml"></view:CityView>
             </TabItem>
             <TabItem x:Name="tcClients" Header="Справочник клиентов">
@@ -86,10 +89,7 @@
             <TabItem x:Name="tcLimits" Header="Справочник лимитов">
                 <view:MeasurementLimitView x:Name="MeasurementViewXaml"></view:MeasurementLimitView>
             </TabItem>
-            <TabItem x:Name="tcMeasurements" Header="Справочник заказов">
-             <view:MeasurmentAddView x:Name="MeasurementAddView"></view:MeasurmentAddView>
-            </TabItem>
-        </TabControl>
 
+        </TabControl>
     </Grid>
 </Window>

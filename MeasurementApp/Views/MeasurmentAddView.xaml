@@ -15,7 +15,108 @@
             <RowDefinition />
         </Grid.RowDefinitions>
         <TabControl Grid.Row="0">
-            <TabItem x:Name="TabNewMes" Header="Создать новый запрос на замер">
+            <TabItem x:Name="TabSetDateMes" Header="Распределить замеры по датам" IsSelected="True" >
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="60"/>
+                        <RowDefinition Height="3"/>
+                        <RowDefinition Height="30"/>
+                        <RowDefinition Height="100"/>
+                        <RowDefinition Height="3"/>
+                        <RowDefinition Height="45"/>
+                        <RowDefinition Height="30"/>
+                        <RowDefinition Height="3"/>
+                        <RowDefinition Height="30"/>
+                        <RowDefinition Height="120"/>
+                        <RowDefinition Height="3"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+
+                        <ColumnDefinition Width="25*"/>
+                        <ColumnDefinition Width="131*"/>
+                        <ColumnDefinition Width="212*"/>
+                        <ColumnDefinition Width="213*"/>
+                        <ColumnDefinition Width="213*"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="5" Margin="0,0,198,0">
+                        <TextBlock Text="Выберите город"/>
+                        <ComboBox HorizontalAlignment="Left" VerticalAlignment="Bottom" Width="170"
+                                  x:Name ="ComboCityForSetDateMeas" 
+                                  ItemsSource="{Binding CitiesForFind}"
+                                  SelectedItem="{Binding CityForFind, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}"
+                                  DisplayMemberPath="Name"/>
+                    </StackPanel>
+                    <StackPanel Grid.Row="0" Grid.Column="3" Grid.ColumnSpan="2" Margin="213,0,0,0">
+                        <Button Content="Выбрать город" HorizontalAlignment="Stretch" Margin="10,10,10,10" VerticalAlignment="Top"
+                                Command="{Binding FindCommand}" />
+                    </StackPanel>
+                    <GridSplitter Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="5" Height="3"
+                                  HorizontalAlignment="Stretch" VerticalAlignment="Center" />
+                    <TextBlock Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="5" Text="Нераспределенные заявки на замер:"/>
+                    <DataGrid Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="5"
+                              IsReadOnly="True"
+                              AutoGenerateColumns="False" 
+                              IsManipulationEnabled="False"
+                              ItemsSource="{Binding MeasurementsWithoutDate}" 
+                              SelectedItem="{Binding SelectedMeasureWithoutDate}" >
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Id" Binding="{Binding Path=Id}" Width="40" />
+                            <DataGridTextColumn Header="Город" Binding="{Binding Path=MeasurementLimit.City.Name}" Width="120" />
+                            <DataGridTextColumn Header="с" Binding="{Binding Path=MeasurementLimit.BeginHour}" Width="30" />
+                            <DataGridTextColumn Header="по" Binding="{Binding Path=MeasurementLimit.EndHour}" Width="30" />
+                            <DataGridTextColumn Header="Фамилия" Binding="{Binding Path=Client.LastName}" Width="120" />
+                            <DataGridTextColumn Header="Телефон" Binding="{Binding Path=Client.PhoneNumber}" Width="*" />
+                            <DataGridTextColumn Header="Адрес" Binding="{Binding Path=Client.Address}" Width="*" />
+                            <DataGridTextColumn Header="Дата" Binding="{Binding Path=MeasurementDate, Converter={StaticResource MyDateConverter}}" Width="100" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                    <StackPanel Grid.Row="5" Grid.ColumnSpan="2" Grid.Column="0">
+                        <TextBlock Text="Выберите дату замера:"/>
+                        <TextBlock Text="Осталось замеров на дату:"/>
+                        <TextBlock Text="{Binding StayLimits, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="5" Grid.Column="1" Grid.ColumnSpan="3" Margin="131,0,0,0">
+                        <DatePicker IsDropDownOpen="False" SelectedDate="{Binding SelectedDate}" />
+                    </StackPanel>
+                    <StackPanel Grid.Row="5" Grid.Column="3" Grid.ColumnSpan="2" Margin="213,0,0,0">
+                        <Button Content="Установить дату" HorizontalAlignment="Stretch" Margin="10,10,10,10" VerticalAlignment="Top"
+                                    Command="{Binding SetDateCommand}" />
+                    </StackPanel>
+                    <TextBlock Grid.Column="0" Grid.Row="8" Grid.ColumnSpan="5" Text="Распределенные заявки на замеры на текущую дату в данном городе:"/>
+
+                    <DataGrid Grid.Row="9" Grid.Column="0" Grid.ColumnSpan="5"
+                              IsReadOnly="True"
+                              AutoGenerateColumns="False" 
+                              IsManipulationEnabled="False"
+                              ItemsSource="{Binding MeasurementsWithDate}" 
+                              SelectedItem="{Binding SelectedMeasureWithDate}" >
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Id" Binding="{Binding Path=Id}" Width="40" />
+                            <DataGridTextColumn Header="Город" Binding="{Binding Path=MeasurementLimit.City.Name}" Width="120" />
+                            <DataGridTextColumn Header="с" Binding="{Binding Path=MeasurementLimit.BeginHour}" Width="30" />
+                            <DataGridTextColumn Header="по" Binding="{Binding Path=MeasurementLimit.EndHour}" Width="30" />
+                            <DataGridTextColumn Header="Фамилия" Binding="{Binding Path=Client.LastName}" Width="120" />
+                            <DataGridTextColumn Header="Телефон" Binding="{Binding Path=Client.PhoneNumber}" Width="*" />
+                            <DataGridTextColumn Header="Адрес" Binding="{Binding Path=Client.Address}" Width="*" />
+                            <DataGridTextColumn Header="Дата" Binding="{Binding Path=MeasurementDate, Converter={StaticResource MyDateConverter}}" Width="100" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                    <GridSplitter Grid.Column="0" Grid.Row="7" Grid.ColumnSpan="5" Height="3"
+                                  HorizontalAlignment="Stretch" VerticalAlignment="Center" />
+                    <GridSplitter Grid.Column="0" Grid.Row="7" Grid.ColumnSpan="5" Height="3"
+                                  HorizontalAlignment="Stretch" VerticalAlignment="Center" />
+
+
+                    <StackPanel Grid.Row="11" Grid.Column="2" Grid.ColumnSpan="3" Margin="212,0,0,0">
+                        <Button Content="Удалить замер из списка распределенных замеров" HorizontalAlignment="Stretch" Margin="10,10,10,10" VerticalAlignment="Top"
+                                Command="{Binding RemoveWithDateCommand}"
+                                CommandParameter="{Binding SelectedMeasureWithDate}"/>
+                    </StackPanel>
+                </Grid>
+            </TabItem>
+            <TabItem x:Name="TabNewMes" Header="Создать новый запрос на замер" IsSelected="False">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="60"/>
@@ -128,108 +229,7 @@
                     </StackPanel>
                 </Grid>
             </TabItem>
-            <TabItem x:Name="TabSetDateMes" Header="Распределить замеры по датам" >
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="60"/>
-                        <RowDefinition Height="3"/>
-                        <RowDefinition Height="30"/>
-                        <RowDefinition Height="100"/>
-                        <RowDefinition Height="3"/>
-                        <RowDefinition Height="45"/>
-                        <RowDefinition Height="30"/>
-                        <RowDefinition Height="3"/>
-                        <RowDefinition Height="30"/>
-                        <RowDefinition Height="120"/>
-                        <RowDefinition Height="3"/>
-                        <RowDefinition Height="*"/>
-                    </Grid.RowDefinitions>
-                    <Grid.ColumnDefinitions>
-
-                        <ColumnDefinition Width="25*"/>
-                        <ColumnDefinition Width="131*"/>
-                        <ColumnDefinition Width="212*"/>
-                        <ColumnDefinition Width="213*"/>
-                        <ColumnDefinition Width="213*"/>
-                    </Grid.ColumnDefinitions>
-                    <StackPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="5" Margin="0,0,198,0">
-                        <TextBlock Text="Выберите город"/>
-                        <ComboBox HorizontalAlignment="Left" VerticalAlignment="Bottom" Width="170"
-                                  x:Name ="ComboCityForSetDateMeas" 
-                                  ItemsSource="{Binding CitiesForFind}"
-                                  SelectedItem="{Binding CityForFind, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}"
-                                  DisplayMemberPath="Name"/>
-                    </StackPanel>
-                    <StackPanel Grid.Row="0" Grid.Column="3" Grid.ColumnSpan="2" Margin="213,0,0,0">
-                        <Button Content="Выбрать город" HorizontalAlignment="Stretch" Margin="10,10,10,10" VerticalAlignment="Top"
-                                Command="{Binding FindCommand}" />
-                    </StackPanel>
-                    <GridSplitter Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="5" Height="3"
-                                  HorizontalAlignment="Stretch" VerticalAlignment="Center" />
-                    <TextBlock Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="5" Text="Нераспределенные заявки на замер:"/>
-                    <DataGrid Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="5"
-                              IsReadOnly="True"
-                              AutoGenerateColumns="False" 
-                              IsManipulationEnabled="False"
-                              ItemsSource="{Binding MeasurementsWithoutDate}" 
-                              SelectedItem="{Binding SelectedMeasureWithoutDate}" >
-                        <DataGrid.Columns>
-                            <DataGridTextColumn Header="Id" Binding="{Binding Path=Id}" Width="40" />
-                            <DataGridTextColumn Header="Город" Binding="{Binding Path=MeasurementLimit.City.Name}" Width="120" />
-                            <DataGridTextColumn Header="с" Binding="{Binding Path=MeasurementLimit.BeginHour}" Width="30" />
-                            <DataGridTextColumn Header="по" Binding="{Binding Path=MeasurementLimit.EndHour}" Width="30" />
-                            <DataGridTextColumn Header="Фамилия" Binding="{Binding Path=Client.LastName}" Width="120" />
-                            <DataGridTextColumn Header="Телефон" Binding="{Binding Path=Client.PhoneNumber}" Width="*" />
-                            <DataGridTextColumn Header="Адрес" Binding="{Binding Path=Client.Address}" Width="*" />
-                            <DataGridTextColumn Header="Дата" Binding="{Binding Path=MeasurementDate, Converter={StaticResource MyDateConverter}}" Width="100" />
-                        </DataGrid.Columns>
-                    </DataGrid>
-                    <StackPanel Grid.Row="5" Grid.ColumnSpan="2" Grid.Column="0">
-                        <TextBlock Text="Выберите дату замера:"/>
-                        <TextBlock Text="Осталось замеров на дату:"/>
-                        <TextBlock Text="{Binding StayLimits, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"/>
-                    </StackPanel>
-                    
-                    <StackPanel Grid.Row="5" Grid.Column="1" Grid.ColumnSpan="3" Margin="131,0,0,0">
-                        <DatePicker IsDropDownOpen="False" SelectedDate="{Binding SelectedDate}" />
-                    </StackPanel>
-                    <StackPanel Grid.Row="5" Grid.Column="3" Grid.ColumnSpan="2" Margin="213,0,0,0">
-                        <Button Content="Установить дату" HorizontalAlignment="Stretch" Margin="10,10,10,10" VerticalAlignment="Top"
-                                    Command="{Binding SetDateCommand}" />
-                    </StackPanel>
-                    <TextBlock Grid.Column="0" Grid.Row="8" Grid.ColumnSpan="5" Text="Распределенные заявки на замеры на текущую дату в данном городе:"/>
-
-                    <DataGrid Grid.Row="9" Grid.Column="0" Grid.ColumnSpan="5"
-                              IsReadOnly="True"
-                              AutoGenerateColumns="False" 
-                              IsManipulationEnabled="False"
-                              ItemsSource="{Binding MeasurementsWithDate}" 
-                              SelectedItem="{Binding SelectedMeasureWithDate}" >
-                        <DataGrid.Columns>
-                            <DataGridTextColumn Header="Id" Binding="{Binding Path=Id}" Width="40" />
-                            <DataGridTextColumn Header="Город" Binding="{Binding Path=MeasurementLimit.City.Name}" Width="120" />
-                            <DataGridTextColumn Header="с" Binding="{Binding Path=MeasurementLimit.BeginHour}" Width="30" />
-                            <DataGridTextColumn Header="по" Binding="{Binding Path=MeasurementLimit.EndHour}" Width="30" />
-                            <DataGridTextColumn Header="Фамилия" Binding="{Binding Path=Client.LastName}" Width="120" />
-                            <DataGridTextColumn Header="Телефон" Binding="{Binding Path=Client.PhoneNumber}" Width="*" />
-                            <DataGridTextColumn Header="Адрес" Binding="{Binding Path=Client.Address}" Width="*" />
-                            <DataGridTextColumn Header="Дата" Binding="{Binding Path=MeasurementDate, Converter={StaticResource MyDateConverter}}" Width="100" />
-                        </DataGrid.Columns>
-                    </DataGrid>
-                    <GridSplitter Grid.Column="0" Grid.Row="7" Grid.ColumnSpan="5" Height="3"
-                                  HorizontalAlignment="Stretch" VerticalAlignment="Center" />
-                    <GridSplitter Grid.Column="0" Grid.Row="7" Grid.ColumnSpan="5" Height="3"
-                                  HorizontalAlignment="Stretch" VerticalAlignment="Center" />
-
-
-                    <StackPanel Grid.Row="11" Grid.Column="2" Grid.ColumnSpan="3" Margin="212,0,0,0">
-                        <Button Content="Удалить замер из списка распределенных замеров" HorizontalAlignment="Stretch" Margin="10,10,10,10" VerticalAlignment="Top"
-                                Command="{Binding RemoveWithDateCommand}"
-                                CommandParameter="{Binding SelectedMeasureWithDate}"/>
-                    </StackPanel>
-                </Grid>
-            </TabItem>
-            <TabItem x:Name="TabShowMes" Header="Посмотреть распределенные замеры по датам и городам">
+            <TabItem x:Name="TabShowMes" Header="Посмотреть распределенные замеры по датам и городам" IsSelected="False">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="30"/>

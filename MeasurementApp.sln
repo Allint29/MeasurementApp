@@ -5,9 +5,7 @@ VisualStudioVersion = 16.0.30002.166
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MeasurementApp", "MeasurementApp\MeasurementApp.csproj", "{648A3C7C-BC53-45BD-AA7F-1E4E273528C5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MeasurementAppTests", "MeasurementAppTests\MeasurementAppTests.csproj", "{750037A4-863E-42CF-9DDD-0D082FB39A24}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MeasurementAppTests1", "MeasurementAppTests1\MeasurementAppTests1.csproj", "{BEFBF916-B4E8-4A19-B921-389BDED36101}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MeasurementAppTests1", "MeasurementAppTests1\MeasurementAppTests1.csproj", "{BEFBF916-B4E8-4A19-B921-389BDED36101}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -19,10 +17,6 @@ Global
 		{648A3C7C-BC53-45BD-AA7F-1E4E273528C5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{648A3C7C-BC53-45BD-AA7F-1E4E273528C5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{648A3C7C-BC53-45BD-AA7F-1E4E273528C5}.Release|Any CPU.Build.0 = Release|Any CPU
-		{750037A4-863E-42CF-9DDD-0D082FB39A24}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{750037A4-863E-42CF-9DDD-0D082FB39A24}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{750037A4-863E-42CF-9DDD-0D082FB39A24}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{750037A4-863E-42CF-9DDD-0D082FB39A24}.Release|Any CPU.Build.0 = Release|Any CPU
 		{BEFBF916-B4E8-4A19-B921-389BDED36101}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{BEFBF916-B4E8-4A19-B921-389BDED36101}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BEFBF916-B4E8-4A19-B921-389BDED36101}.Release|Any CPU.ActiveCfg = Release|Any CPU

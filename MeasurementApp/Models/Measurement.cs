@@ -79,7 +79,8 @@ namespace MeasurementApp.Models
         /// Метод присвоения даты замера
         /// </summary>
         /// <param name="date"></param>
-        public bool SetDateForMeasurement(DateTime? date)
+        /// <param name="showMessage">если не нужно показывать окно - false</param>
+        public bool SetDateForMeasurement(DateTime? date, bool showMessage = true)
         {
             int remainingMeasurementLimit = MeasurementLimit.Limit;
 
@@ -88,8 +89,8 @@ namespace MeasurementApp.Models
 
             if (remainingMeasurementLimit < 1)
             {
-                MessageBox.Show(
-                    $"Количество лимитов на замер в г.{MeasurementLimit.City?.Name} = {remainingMeasurementLimit}");
+                if(showMessage)
+                    MessageBox.Show($"Количество лимитов на замер в г.{MeasurementLimit.City?.Name} = {remainingMeasurementLimit}");
                 return false;
             }
 

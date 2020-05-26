@@ -311,5 +311,76 @@ namespace MeasurementApp.ViewModels.Tests
             ClearData();
             Assert.IsTrue(isEmptyCitiesList && isFullCitiesList);
         }
+
+        /// <summary>
+        /// Тест на превышение лимита замеров на дату в одном городе
+        /// </summary>
+        [TestMethod()]
+        public void SetDateWithLimitsTest()
+        {
+            var city1 = new City("Moscow");
+
+            City.AllCities.Add(city1);
+
+            var client1 = new Client("Ivanov", "Ivan", 9271112233, city1, "Vernadskogo, 23");
+            var client2 = new Client("Petrov", "Petr", 9271112232, city1, "Vernadskogo, 24");
+            var client3 = new Client("Alexandrov", "Alex", 9271112231, city1, "Vernadskogo, 25");
+            var client4 = new Client("Shevelev", "Turk", 9271112230, city1, "Vernadskogo, 26");
+
+            Client.AllClients.Add(client1);
+            Client.AllClients.Add(client2);
+            Client.AllClients.Add(client3);
+            Client.AllClients.Add(client4);
+
+            //три лимита на данный период
+            var measLimit1 = new MeasurementLimit(8, 20, 3, city1);
+
+            MeasurementLimit.AllMeasurementLimits.Add(measLimit1);
+
+            //устанавливаю заявки на замеры в городе
+            var meas1 = new Measurement(measLimit1, client1, null);
+            var meas2 = new Measurement(measLimit1, client2, null);
+            var meas3 = new Measurement(measLimit1, client3, null);
+            var meas4 = new Measurement(measLimit1, client4, null);
+
+            Measurement.AllMeasurements.Add(meas1);
+            Measurement.AllMeasurements.Add(meas2);
+            Measurement.AllMeasurements.Add(meas3);
+            Measurement.AllMeasurements.Add(meas4);
+
+            var meas = new MeasurementViewModel();
+
+            //при инициализации должно быть  4 записи в нераспределенных заказах
+            bool isFourMeasurementWithoutDates = meas.MeasurementsWithoutDate.Count() == 4;
+
+            var date = DateTime.Today;
+
+            meas.SelectedDate = date;
+            //устанавливаю дату для первой заявки
+            meas.SelectedMeasureWithoutDate = meas.MeasurementsWithoutDate.FirstOrDefault(m => m.Id == meas1.Id);
+            meas.SetDate(false);
+
+            //устанавливаю дату для второй заявки
+            meas.SelectedMeasureWithoutDate = meas.MeasurementsWithoutDate.FirstOrDefault(m => m.Id == meas2.Id);
+            meas.SetDate(false);
+
+            //устанавливаю дату для третьей заявки
+            meas.SelectedMeasureWithoutDate = meas.MeasurementsWithoutDate.FirstOrDefault(m => m.Id == meas3.Id);
+            meas.SetDate(false);
+
+            bool isThreeMeasurementWithDatesOneWithout1 = meas.MeasurementsWithoutDate.Count() == 1 && meas.MeasurementsWithDate.Count() == 3;
+
+            //устанавливаю дату для третьей заявки
+            meas.SelectedMeasureWithoutDate = meas.MeasurementsWithoutDate.FirstOrDefault(m => m.Id == meas4.Id);
+            meas.SetDate(false);
+
+            bool isThreeMeasurementWithDatesOneWithout2 = meas.MeasurementsWithoutDate.Count() == 1 && meas.MeasurementsWithDate.Count() == 3;
+
+
+            ClearData();
+
+            Assert.IsTrue(isFourMeasurementWithoutDates && isThreeMeasurementWithDatesOneWithout1 && isThreeMeasurementWithDatesOneWithout2);
+        }
+
     }
 }
